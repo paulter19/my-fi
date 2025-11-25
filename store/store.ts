@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import accountsReducer from './slices/accountsSlice';
 import billsReducer from './slices/billsSlice';
 import incomeReducer from './slices/incomeSlice';
 import transactionsReducer from './slices/transactionsSlice';
@@ -9,6 +10,7 @@ export const store = configureStore({
         income: incomeReducer,
         bills: billsReducer,
         transactions: transactionsReducer,
+        accounts: accountsReducer,
         ui: uiReducer,
     },
 });

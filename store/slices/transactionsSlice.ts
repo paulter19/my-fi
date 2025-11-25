@@ -7,6 +7,7 @@ export interface Transaction {
     date: string; // ISO date string
     category: string;
     type: 'income' | 'expense';
+    accountId?: string;
 }
 
 interface TransactionsState {
@@ -15,11 +16,11 @@ interface TransactionsState {
 
 const initialState: TransactionsState = {
     items: [
-        { id: '1', title: 'Grocery Shopping', amount: 150, date: '2023-11-02', category: 'Food', type: 'expense' },
-        { id: '2', title: 'Gas Station', amount: 45, date: '2023-11-05', category: 'Transport', type: 'expense' },
-        { id: '3', title: 'Salary Deposit', amount: 2500, date: '2023-11-15', category: 'Salary', type: 'income' },
-        { id: '4', title: 'Coffee Shop', amount: 5.50, date: '2023-11-16', category: 'Food', type: 'expense' },
-        { id: '5', title: 'Online Course', amount: 29.99, date: '2023-11-18', category: 'Education', type: 'expense' },
+        { id: '1', title: 'Grocery Shopping', amount: 150, date: '2023-11-02', category: 'Food', type: 'expense', accountId: '1' },
+        { id: '2', title: 'Gas Station', amount: 45, date: '2023-11-05', category: 'Transport', type: 'expense', accountId: '1' },
+        { id: '3', title: 'Salary Deposit', amount: 2500, date: '2023-11-15', category: 'Salary', type: 'income', accountId: '1' },
+        { id: '4', title: 'Coffee Shop', amount: 5.50, date: '2023-11-16', category: 'Food', type: 'expense', accountId: '1' },
+        { id: '5', title: 'Online Course', amount: 29.99, date: '2023-11-18', category: 'Education', type: 'expense', accountId: '3' },
     ],
 };
 

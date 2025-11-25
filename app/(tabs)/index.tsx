@@ -1,4 +1,7 @@
+import { AccountCard } from '@/components/AccountCard';
+import { AddAccountModal } from '@/components/AddAccountModal';
 import { Card } from '@/components/Card';
+import { ConnectBankModal } from '@/components/ConnectBankModal';
 import { ListItem } from '@/components/ListItem';
 import { StatBox } from '@/components/StatBox';
 import {
@@ -11,9 +14,10 @@ import {
   selectUpcomingBills
 } from '@/store/selectors/chartsSelectors';
 import { RootState } from '@/store/store';
-import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
@@ -28,9 +32,13 @@ export default function DashboardScreen() {
   const monthlySpending = useSelector(selectMonthlySpending);
   const incomeVsBills = useSelector(selectIncomeVsBills);
   const upcomingBills = useSelector(selectUpcomingBills);
+  const accounts = useSelector((state: RootState) => state.accounts.items);
   const theme = useSelector((state: RootState) => state.ui.theme);
   const isDark = theme === 'dark';
   const [refreshing, setRefreshing] = useState(false);
+  const [isAddAccountVisible, setIsAddAccountVisible] = useState(false);
+  const [isConnectBankVisible, setIsConnectBankVisible] = useState(false);
+  const router = useRouter();
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -74,6 +82,27 @@ export default function DashboardScreen() {
             </Text>
           </View>
         </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Accounts</Text>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity onPress={() => setIsConnectBankVisible(true)} style={styles.iconButton}>
+              <Ionicons name="link" size={24} color="#4A90E2" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsAddAccountVisible(true)} style={styles.iconButton}>
+              <Ionicons name="add-circle" size={24} color="#4A90E2" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {accounts.map((account) => (
+          <AccountCard
+            key={account.id}
+            account={account}
+            onPress={(acc) => router.push(`/account/${acc.id}`)}
+            isDark={isDark}
+          />
+        ))}
 
         <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Income vs Bills</Text>
         <Card>
@@ -134,6 +163,18 @@ export default function DashboardScreen() {
           />
         </Card>
       </ScrollView>
+
+      <AddAccountModal
+        visible={isAddAccountVisible}
+        onClose={() => setIsAddAccountVisible(false)}
+        isDark={isDark}
+      />
+
+      <ConnectBankModal
+        visible={isConnectBankVisible}
+        onClose={() => setIsConnectBankVisible(false)}
+        isDark={isDark}
+      />
     </SafeAreaView>
   );
 }
@@ -163,11 +204,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    marginTop: 12,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  iconButton: {
+    padding: 4,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 12,
-    marginTop: 12,
     color: '#333',
   },
   sectionTitleDark: {
