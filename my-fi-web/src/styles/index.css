@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 99, 102, 241;
+    --success: 34, 197, 94;
+    --danger: 239, 68, 68;
+    --warning: 251, 146, 60;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen;
+  }
+
+  .dark body {
+    @apply bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950;
+  }
+}
+
+@layer components {
+  .card-glass {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl shadow-2xl;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-slate-200 dark:border-slate-700;
+  }
+
+  .stat-card {
+    @apply card-glass p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium;
+  }
+
+  .nav-link-active {
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg;
+  }
+
+  .nav-link-inactive {
+    @apply text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent;
+  }
+}

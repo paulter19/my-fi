@@ -1,17 +1,17 @@
-import { mockStripeService } from '@/services/stripeService';
+import { stripeService } from '@/services/stripeService';
 import { addAccount } from '@/store/slices/accountsSlice';
 import { addTransaction } from '@/store/slices/transactionsSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { nanoid } from '@reduxjs/toolkit';
-import React, { useEffect, useState } from 'react';
+import { useFinancialConnectionsSheet } from '@stripe/stripe-react-native';
+import React, { useState } from 'react';
 import {
     ActivityIndicator,
-    FlatList,
     Modal,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 
@@ -21,120 +21,67 @@ interface ConnectBankModalProps {
     isDark: boolean;
 }
 
-const MOCK_BANKS = [
-    { id: 'chase', name: 'Chase', color: '#117ACA' },
-    { id: 'bofa', name: 'Bank of America', color: '#E31837' },
-    { id: 'wells', name: 'Wells Fargo', color: '#CD1409' },
-    { id: 'citi', name: 'Citi', color: '#003B70' },
-];
-
 export const ConnectBankModal: React.FC<ConnectBankModalProps> = ({ visible, onClose, isDark }) => {
     const dispatch = useDispatch();
-    const [step, setStep] = useState<'loading' | 'select' | 'connecting' | 'success'>('loading');
-    const [selectedBank, setSelectedBank] = useState<typeof MOCK_BANKS[0] | null>(null);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (visible) {
-            setStep('loading');
-            setTimeout(() => setStep('select'), 1500);
-        }
-    }, [visible]);
+    const { collectBankAccountToken } = useFinancialConnectionsSheet();
 
-    const handleSelectBank = async (bank: typeof MOCK_BANKS[0]) => {
-        setSelectedBank(bank);
-        setStep('connecting');
-
+    const handleConnect = async () => {
+        setLoading(true);
         try {
-            const data = await mockStripeService.fetchAccountData();
+            // 1. Get Client Secret from Backend
+            const { clientSecret, publishableKey } = await stripeService.createSession();
 
-            const accountId = nanoid();
+            // 2. Present Stripe Sheet
+            const { session, error } = await collectBankAccountToken(clientSecret);
 
-            // Add Account
-            dispatch(addAccount({
-                id: accountId,
-                name: `${bank.name} Checking`,
-                type: 'checking',
-                balance: data.balance,
-                currency: 'USD',
-                source: 'stripe',
-                stripeAccountId: `acct_${nanoid()}`,
-                lastSynced: new Date().toISOString()
-            }));
+            if (error) {
+                console.log('Stripe Error:', error);
+                setLoading(false);
+                return;
+            }
 
-            // Add Transactions
-            data.transactions.forEach(t => {
-                dispatch(addTransaction({
-                    ...t,
-                    accountId
-                }));
-            });
+            if (session) {
+                // 3. Fetch Account Details from Backend
+                const accounts = await stripeService.fetchAccounts(session.id);
 
-            setStep('success');
-            setTimeout(() => {
+                for (const acc of accounts) {
+                    const accountId = nanoid();
+
+                    // Add Account
+                    dispatch(addAccount({
+                        id: accountId,
+                        name: acc.institution_name + ' ' + acc.last4,
+                        type: 'checking', // Simplified mapping
+                        balance: acc.balance.current, // Assuming USD
+                        currency: acc.currency,
+                        source: 'stripe',
+                        stripeAccountId: acc.id,
+                        lastSynced: new Date().toISOString()
+                    }));
+
+                    // 4. Fetch Transactions
+                    const transactions = await stripeService.fetchTransactions(acc.id);
+                    transactions.forEach((t: any) => {
+                        dispatch(addTransaction({
+                            id: t.id,
+                            title: t.description,
+                            amount: Math.abs(t.amount / 100), // Stripe amounts are in cents
+                            date: new Date(t.transacted_at * 1000).toISOString().split('T')[0],
+                            category: 'Uncategorized', // Stripe categories might need mapping
+                            type: t.amount < 0 ? 'expense' : 'income',
+                            accountId
+                        }));
+                    });
+                }
+
                 onClose();
-                setStep('loading');
-                setSelectedBank(null);
-            }, 1500);
-        } catch (error) {
-            console.error('Failed to connect bank', error);
-            setStep('select');
-        }
-    };
-
-    const renderContent = () => {
-        switch (step) {
-            case 'loading':
-                return (
-                    <View style={styles.centerContent}>
-                        <ActivityIndicator size="large" color="#635BFF" />
-                        <Text style={[styles.loadingText, isDark && styles.textDark]}>
-                            Initializing Stripe...
-                        </Text>
-                    </View>
-                );
-
-            case 'select':
-                return (
-                    <>
-                        <Text style={[styles.title, isDark && styles.textDark]}>Select your bank</Text>
-                        <FlatList
-                            data={MOCK_BANKS}
-                            keyExtractor={item => item.id}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    style={[styles.bankItem, isDark && styles.bankItemDark]}
-                                    onPress={() => handleSelectBank(item)}
-                                >
-                                    <View style={[styles.bankIcon, { backgroundColor: item.color }]}>
-                                        <Text style={styles.bankIconText}>{item.name[0]}</Text>
-                                    </View>
-                                    <Text style={[styles.bankName, isDark && styles.textDark]}>{item.name}</Text>
-                                    <Ionicons name="chevron-forward" size={20} color={isDark ? '#666' : '#CCC'} />
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </>
-                );
-
-            case 'connecting':
-                return (
-                    <View style={styles.centerContent}>
-                        <ActivityIndicator size="large" color="#635BFF" />
-                        <Text style={[styles.loadingText, isDark && styles.textDark]}>
-                            Connecting to {selectedBank?.name}...
-                        </Text>
-                    </View>
-                );
-
-            case 'success':
-                return (
-                    <View style={styles.centerContent}>
-                        <Ionicons name="checkmark-circle" size={64} color="#27AE60" />
-                        <Text style={[styles.successText, isDark && styles.textDark]}>
-                            Account Connected!
-                        </Text>
-                    </View>
-                );
+            }
+        } catch (e) {
+            console.error('Connection failed', e);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -151,13 +98,24 @@ export const ConnectBankModal: React.FC<ConnectBankModalProps> = ({ visible, onC
                         <Ionicons name="close" size={24} color={isDark ? 'white' : '#333'} />
                     </TouchableOpacity>
                     <View style={styles.stripeBadge}>
-                        <Text style={styles.stripeText}>Powered by Stripe</Text>
+                        <Text style={styles.stripeText}>Stripe Secured</Text>
                     </View>
                     <View style={{ width: 24 }} />
                 </View>
 
                 <View style={styles.content}>
-                    {renderContent()}
+                    <Text style={[styles.title, isDark && styles.textDark]}>Connect your bank</Text>
+                    <Text style={[styles.subtitle, isDark && styles.subTextDark]}>
+                        Link your bank account to automatically sync balances and transactions.
+                    </Text>
+
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#635BFF" style={{ marginTop: 40 }} />
+                    ) : (
+                        <TouchableOpacity style={styles.connectButton} onPress={handleConnect}>
+                            <Text style={styles.connectButtonText}>Connect with Stripe</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </Modal>
@@ -193,59 +151,41 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        padding: 20,
-    },
-    centerContent: {
-        flex: 1,
-        justifyContent: 'center',
+        padding: 24,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 24,
+        marginBottom: 16,
         color: '#333',
+        textAlign: 'center',
     },
-    loadingText: {
-        marginTop: 16,
+    subtitle: {
         fontSize: 16,
         color: '#666',
+        textAlign: 'center',
+        marginBottom: 40,
+        lineHeight: 24,
     },
-    successText: {
-        marginTop: 16,
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    bankItem: {
-        flexDirection: 'row',
+    connectButton: {
+        backgroundColor: '#635BFF',
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        borderRadius: 12,
+        width: '100%',
         alignItems: 'center',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
     },
-    bankItemDark: {
-        borderBottomColor: '#333',
-    },
-    bankIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
-    },
-    bankIconText: {
+    connectButtonText: {
         color: 'white',
-        fontWeight: 'bold',
         fontSize: 18,
-    },
-    bankName: {
-        flex: 1,
-        fontSize: 16,
-        color: '#333',
+        fontWeight: 'bold',
     },
     textDark: {
         color: 'white',
+    },
+    subTextDark: {
+        color: '#AAA',
     },
 });

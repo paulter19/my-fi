@@ -9,17 +9,21 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+import { StripeProvider } from '@stripe/stripe-react-native';
+
 function RootLayoutNav() {
   const theme = useSelector((state: RootState) => state.ui.theme);
 
   return (
-    <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-    </ThemeProvider>
+    <StripeProvider publishableKey="pk_test_51SXUzZPJNIokrXB6bIVrLwutXqrlQTFLGQndCHpULqCnhz03QFCcYC7fpyiq14Bib1EOrzOr9RvbYrQ5KFjhDxNP00e4DSisf4">
+      <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        </Stack>
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </StripeProvider>
   );
 }
 

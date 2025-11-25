@@ -1,7 +1,4 @@
-import { Platform } from 'react-native';
-
-// Use localhost for iOS simulator, 10.0.2.2 for Android emulator
-const API_URL = Platform.OS === 'ios' ? 'http://localhost:3000' : 'http://10.0.2.2:3000';
+const API_URL = 'http://localhost:3000';
 
 export const stripeService = {
     createSession: async () => {
