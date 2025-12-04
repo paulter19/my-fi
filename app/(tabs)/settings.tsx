@@ -1,9 +1,13 @@
 import { Card } from '@/components/Card';
+import { auth } from '@/firebaseConfig';
+import { resetAccounts } from '@/store/slices/accountsSlice';
+import { logout } from '@/store/slices/authSlice';
 import { resetBills } from '@/store/slices/billsSlice';
 import { resetIncome } from '@/store/slices/incomeSlice';
 import { resetTransactions } from '@/store/slices/transactionsSlice';
 import { toggleTheme } from '@/store/slices/uiSlice';
 import { RootState } from '@/store/store';
+import { signOut } from 'firebase/auth';
 import React from 'react';
 import { Alert, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,6 +27,7 @@ export default function SettingsScreen() {
                         dispatch(resetBills());
                         dispatch(resetIncome());
                         dispatch(resetTransactions());
+                        dispatch(resetAccounts());
                     },
                 },
             ],
@@ -34,6 +39,16 @@ export default function SettingsScreen() {
 
     const handleToggleTheme = () => {
         dispatch(toggleTheme());
+    };
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            dispatch(logout());
+        } catch (error) {
+            console.error('Error signing out: ', error);
+            Alert.alert('Error', 'Failed to sign out');
+        }
     };
 
     return (
@@ -58,6 +73,10 @@ export default function SettingsScreen() {
                 </Card>
                 <TouchableOpacity style={styles.clearButton} onPress={handleClearData}>
                     <Text style={styles.clearButtonText}>Clear All Data</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.clearButton, styles.logoutButton]} onPress={handleLogout}>
+                    <Text style={styles.clearButtonText}>Logout</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -101,6 +120,10 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    logoutButton: {
+        backgroundColor: '#333',
+        marginTop: 12,
     },
     content: {
         padding: 16,

@@ -36,10 +36,13 @@ const accountsSlice = createSlice({
             state.items = state.items.filter((item) => item.id !== action.payload);
         },
         resetAccounts: (state) => {
-            state.items = initialState.items;
+            state.items = [];
+        },
+        setAccounts: (state, action: PayloadAction<Account[]>) => {
+            state.items = action.payload;
         }
     },
 });
 
-export const { addAccount, updateAccount, deleteAccount, resetAccounts } = accountsSlice.actions;
+export const { addAccount, updateAccount, deleteAccount, resetAccounts, setAccounts } = accountsSlice.actions;
 export default accountsSlice.reducer;

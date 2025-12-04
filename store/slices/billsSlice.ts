@@ -15,12 +15,7 @@ interface BillsState {
 }
 
 const initialState: BillsState = {
-    items: [
-        { id: '1', title: 'Rent', amount: 1500, dueDate: '01', category: 'Housing', isPaid: true, type: 'monthly' },
-        { id: '2', title: 'Electricity', amount: 120, dueDate: '2023-11-15', category: 'Utilities', isPaid: false, type: 'one-time' },
-        { id: '3', title: 'Internet', amount: 60, dueDate: '2023-11-20', category: 'Utilities', isPaid: false, type: 'one-time' },
-        { id: '4', title: 'Car Insurance', amount: 100, dueDate: '2023-11-25', category: 'Insurance', isPaid: false, type: 'one-time' },
-    ],
+    items: [],
 };
 
 const billsSlice = createSlice({
@@ -38,7 +33,10 @@ const billsSlice = createSlice({
         },
         // Reset all bills to initial state
         resetBills: (state) => {
-            state.items = initialState.items;
+            state.items = [];
+        },
+        setBills: (state, action: PayloadAction<Bill[]>) => {
+            state.items = action.payload;
         },
         deleteBill: (state, action: PayloadAction<string>) => {
             state.items = state.items.filter((item) => item.id !== action.payload);
@@ -60,5 +58,5 @@ const billsSlice = createSlice({
     },
 });
 
-export const { addBill, updateBill, deleteBill, toggleBillPaid, setBillsStatus, resetBills } = billsSlice.actions;
+export const { addBill, updateBill, resetBills, deleteBill, toggleBillPaid, setBillsStatus, setBills } = billsSlice.actions;
 export default billsSlice.reducer;

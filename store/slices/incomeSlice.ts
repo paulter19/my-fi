@@ -12,11 +12,7 @@ interface IncomeState {
 }
 
 const initialState: IncomeState = {
-  items: [
-    { id: '1', title: 'Full-time Job', amount: 5000, frequency: 'monthly' },
-    { id: '2', title: 'Freelance Project', amount: 1200, frequency: 'one-time' },
-    { id: '3', title: 'Dividends', amount: 300, frequency: 'monthly' },
-  ],
+  items: [],
 };
 
 const incomeSlice = createSlice({
@@ -34,7 +30,10 @@ const incomeSlice = createSlice({
     },
     // Reset all income to initial state
     resetIncome: (state) => {
-      state.items = initialState.items;
+      state.items = [];
+    },
+    setIncome: (state, action: PayloadAction<Income[]>) => {
+      state.items = action.payload;
     },
     deleteIncome: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
@@ -42,5 +41,5 @@ const incomeSlice = createSlice({
   },
 });
 
-export const { addIncome, updateIncome, deleteIncome, resetIncome } = incomeSlice.actions;
+export const { addIncome, updateIncome, resetIncome, deleteIncome, setIncome } = incomeSlice.actions;
 export default incomeSlice.reducer;

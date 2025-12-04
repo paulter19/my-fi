@@ -1,9 +1,4 @@
-import { stripeService } from '@/services/stripeService';
-import { addAccount } from '@/store/slices/accountsSlice';
-import { addTransaction } from '@/store/slices/transactionsSlice';
 import { Ionicons } from '@expo/vector-icons';
-import { nanoid } from '@reduxjs/toolkit';
-import { useFinancialConnectionsSheet } from '@stripe/stripe-react-native';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
@@ -25,59 +20,60 @@ export const ConnectBankModal: React.FC<ConnectBankModalProps> = ({ visible, onC
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
 
-    const { collectBankAccountToken } = useFinancialConnectionsSheet();
+    // const { collectBankAccountToken } = useFinancialConnectionsSheet();
 
     const handleConnect = async () => {
         setLoading(true);
         try {
             // 1. Get Client Secret from Backend
-            const { clientSecret, publishableKey } = await stripeService.createSession();
+            // const { clientSecret, publishableKey } = await stripeService.createSession();
 
             // 2. Present Stripe Sheet
-            const { session, error } = await collectBankAccountToken(clientSecret);
+            // const { session, error } = await collectBankAccountToken(clientSecret);
 
-            if (error) {
-                console.log('Stripe Error:', error);
-                setLoading(false);
-                return;
-            }
+            // if (error) {
+            //     console.log('Stripe Error:', error);
+            //     setLoading(false);
+            //     return;
+            // }
 
-            if (session) {
-                // 3. Fetch Account Details from Backend
-                const accounts = await stripeService.fetchAccounts(session.id);
+            // if (session) {
+            //     // 3. Fetch Account Details from Backend
+            //     const accounts = await stripeService.fetchAccounts(session.id);
 
-                for (const acc of accounts) {
-                    const accountId = nanoid();
+            //     for (const acc of accounts) {
+            //         const accountId = nanoid();
 
-                    // Add Account
-                    dispatch(addAccount({
-                        id: accountId,
-                        name: acc.institution_name + ' ' + acc.last4,
-                        type: 'checking', // Simplified mapping
-                        balance: acc.balance.current, // Assuming USD
-                        currency: acc.currency,
-                        source: 'stripe',
-                        stripeAccountId: acc.id,
-                        lastSynced: new Date().toISOString()
-                    }));
+            //         // Add Account
+            //         dispatch(addAccount({
+            //             id: accountId,
+            //             name: acc.institution_name + ' ' + acc.last4,
+            //             type: 'checking', // Simplified mapping
+            //             balance: acc.balance.current, // Assuming USD
+            //             currency: acc.currency,
+            //             source: 'stripe',
+            //             stripeAccountId: acc.id,
+            //             lastSynced: new Date().toISOString()
+            //         }));
 
-                    // 4. Fetch Transactions
-                    const transactions = await stripeService.fetchTransactions(acc.id);
-                    transactions.forEach((t: any) => {
-                        dispatch(addTransaction({
-                            id: t.id,
-                            title: t.description,
-                            amount: Math.abs(t.amount / 100), // Stripe amounts are in cents
-                            date: new Date(t.transacted_at * 1000).toISOString().split('T')[0],
-                            category: 'Uncategorized', // Stripe categories might need mapping
-                            type: t.amount < 0 ? 'expense' : 'income',
-                            accountId
-                        }));
-                    });
-                }
+            //         // 4. Fetch Transactions
+            //         const transactions = await stripeService.fetchTransactions(acc.id);
+            //         transactions.forEach((t: any) => {
+            //             dispatch(addTransaction({
+            //                 id: t.id,
+            //                 title: t.description,
+            //                 amount: Math.abs(t.amount / 100), // Stripe amounts are in cents
+            //                 date: new Date(t.transacted_at * 1000).toISOString().split('T')[0],
+            //                 category: 'Uncategorized', // Stripe categories might need mapping
+            //                 type: t.amount < 0 ? 'expense' : 'income',
+            //                 accountId
+            //             }));
+            //         });
+            //     }
 
-                onClose();
-            }
+            //     onClose();
+            // }
+            console.log("Stripe integration disabled");
         } catch (e) {
             console.error('Connection failed', e);
         } finally {
