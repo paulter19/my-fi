@@ -6,7 +6,7 @@ import { addIncome, deleteIncome, Income } from '@/store/slices/incomeSlice';
 import { RootState } from '@/store/store';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Keyboard, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -69,11 +69,13 @@ export default function IncomeScreen() {
 
     return (
         <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-            <View style={[styles.header, isDark && styles.headerDark]}>
-                <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Income</Text>
-            </View>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={{ flex: 1 }}>
+                    <View style={[styles.header, isDark && styles.headerDark]}>
+                        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Income</Text>
+                    </View>
 
-            <FlatList
+                    <FlatList
                 data={incomeItems}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
@@ -88,9 +90,11 @@ export default function IncomeScreen() {
                 )}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 contentContainerStyle={styles.listContent}
-            />
+                    />
 
-            <AddButton onPress={() => setModalVisible(true)} />
+                    <AddButton onPress={() => setModalVisible(true)} />
+                </View>
+            </TouchableWithoutFeedback>
 
             <ModalForm
                 visible={isModalVisible}

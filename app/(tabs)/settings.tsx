@@ -9,7 +9,7 @@ import { toggleTheme } from '@/store/slices/uiSlice';
 import { RootState } from '@/store/store';
 import { signOut } from 'firebase/auth';
 import React from 'react';
-import { Alert, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Switch, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -35,6 +35,7 @@ export default function SettingsScreen() {
         );
     };
     const theme = useSelector((state: RootState) => state.ui.theme);
+    const user = useSelector((state: RootState) => state.auth.user);
     const isDark = theme === 'dark';
 
     const handleToggleTheme = () => {
@@ -53,11 +54,26 @@ export default function SettingsScreen() {
 
     return (
         <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-            <View style={[styles.header, isDark && styles.headerDark]}>
-                <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Settings</Text>
-            </View>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={{ flex: 1 }}>
+                    <View style={[styles.header, isDark && styles.headerDark]}>
+                        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Settings</Text>
+                    </View>
 
-            <View style={styles.content}>
+                    <View style={styles.content}>
+                        {user && (
+                            <Card style={styles.userCard}>
+                                <View style={styles.userHeader}>
+                                    <Text style={[styles.userTitle, isDark && styles.userTitleDark]}>Account</Text>
+                                </View>
+                                <View style={styles.userInfo}>
+                                    <View style={styles.userInfoRow}>
+                                        <Text style={[styles.userLabel, isDark && styles.userLabelDark]}>Email</Text>
+                                        <Text style={[styles.userValue, isDark && styles.userValueDark]}>{user.email || 'Not available'}</Text>
+                                    </View>
+                                </View>
+                            </Card>
+                        )}
                 <Card style={styles.settingItem}>
                     {/* Existing setting items */}
                     <View>
@@ -78,7 +94,9 @@ export default function SettingsScreen() {
                 <TouchableOpacity style={[styles.clearButton, styles.logoutButton]} onPress={handleLogout}>
                     <Text style={styles.clearButtonText}>Logout</Text>
                 </TouchableOpacity>
-            </View>
+                    </View>
+                </View>
+            </TouchableWithoutFeedback>
         </SafeAreaView>
     );
 }
@@ -149,5 +167,46 @@ const styles = StyleSheet.create({
     },
     settingSubtitleDark: {
         color: '#AAA',
+    },
+    userCard: {
+        padding: 16,
+        marginBottom: 16,
+    },
+    userHeader: {
+        marginBottom: 12,
+    },
+    userTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
+    userTitleDark: {
+        color: 'white',
+    },
+    userInfo: {
+        gap: 12,
+    },
+    userInfoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    userLabel: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '500',
+    },
+    userLabelDark: {
+        color: '#AAA',
+    },
+    userValue: {
+        fontSize: 14,
+        color: '#333',
+        flex: 1,
+        textAlign: 'right',
+        marginLeft: 16,
+    },
+    userValueDark: {
+        color: '#DDD',
     },
 });

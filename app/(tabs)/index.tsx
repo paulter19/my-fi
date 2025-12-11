@@ -1,23 +1,22 @@
 import { AccountCard } from '@/components/AccountCard';
 import { AddAccountModal } from '@/components/AddAccountModal';
 import { Card } from '@/components/Card';
-import { ConnectBankModal } from '@/components/ConnectBankModal';
 import { ListItem } from '@/components/ListItem';
 import { StatBox } from '@/components/StatBox';
 import {
-  selectIncomeVsBills,
-  selectMonthlySpending,
-  selectRemainingBalance,
-  selectSpendingByCategory,
-  selectTotalBills,
-  selectTotalIncome,
-  selectUpcomingBills
+    selectIncomeVsBills,
+    selectMonthlySpending,
+    selectRemainingBalance,
+    selectSpendingByCategory,
+    selectTotalBills,
+    selectTotalIncome,
+    selectUpcomingBills
 } from '@/store/selectors/chartsSelectors';
 import { RootState } from '@/store/store';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Keyboard, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
@@ -37,7 +36,6 @@ export default function DashboardScreen() {
   const isDark = theme === 'dark';
   const [refreshing, setRefreshing] = useState(false);
   const [isAddAccountVisible, setIsAddAccountVisible] = useState(false);
-  const [isConnectBankVisible, setIsConnectBankVisible] = useState(false);
   const router = useRouter();
 
   const onRefresh = () => {
@@ -62,10 +60,11 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
         <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Dashboard</Text>
 
         <View style={styles.statsContainer}>
@@ -86,9 +85,6 @@ export default function DashboardScreen() {
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Accounts</Text>
           <View style={styles.headerButtons}>
-            <TouchableOpacity onPress={() => setIsConnectBankVisible(true)} style={styles.iconButton}>
-              <Ionicons name="link" size={24} color="#4A90E2" />
-            </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsAddAccountVisible(true)} style={styles.iconButton}>
               <Ionicons name="add-circle" size={24} color="#4A90E2" />
             </TouchableOpacity>
@@ -163,6 +159,7 @@ export default function DashboardScreen() {
           />
         </Card>
       </ScrollView>
+      </TouchableWithoutFeedback>
 
       <AddAccountModal
         visible={isAddAccountVisible}
@@ -170,11 +167,6 @@ export default function DashboardScreen() {
         isDark={isDark}
       />
 
-      <ConnectBankModal
-        visible={isConnectBankVisible}
-        onClose={() => setIsConnectBankVisible(false)}
-        isDark={isDark}
-      />
     </SafeAreaView>
   );
 }

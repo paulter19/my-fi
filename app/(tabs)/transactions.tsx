@@ -6,7 +6,7 @@ import { RootState } from '@/store/store';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useMemo, useState } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Keyboard, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -83,8 +83,10 @@ export default function TransactionsScreen() {
 
     return (
         <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-            <View style={[styles.header, isDark && styles.headerDark]}>
-                <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Transactions</Text>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={{ flex: 1 }}>
+                    <View style={[styles.header, isDark && styles.headerDark]}>
+                        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Transactions</Text>
                 <View style={[styles.searchContainer, isDark && styles.searchContainerDark]}>
                     <Ionicons name="search" size={20} color={isDark ? "#AAA" : "#666"} style={styles.searchIcon} />
                     <TextInput
@@ -156,9 +158,11 @@ export default function TransactionsScreen() {
                 )}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 contentContainerStyle={styles.listContent}
-            />
+                    />
 
-            <AddButton onPress={() => setModalVisible(true)} />
+                    <AddButton onPress={() => setModalVisible(true)} />
+                </View>
+            </TouchableWithoutFeedback>
 
             <ModalForm
                 visible={isModalVisible}

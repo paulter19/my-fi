@@ -6,7 +6,7 @@ import { RootState } from '@/store/store';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Platform, RefreshControl, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Keyboard, Platform, RefreshControl, StyleSheet, Switch, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -142,8 +142,10 @@ export default function BillsScreen() {
 
     return (
         <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-            <View style={[styles.header, isDark && styles.headerDark]}>
-                <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Bills</Text>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={{ flex: 1 }}>
+                    <View style={[styles.header, isDark && styles.headerDark]}>
+                        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>Bills</Text>
                 <View style={styles.headerToggleContainer}>
                     <Text style={[styles.headerToggleLabel, isDark && styles.headerToggleLabelDark]}>Mark All {toggleAllPaid ? 'Unpaid' : 'Paid'}</Text>
                     <Switch
@@ -189,9 +191,11 @@ export default function BillsScreen() {
                 )}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 contentContainerStyle={styles.listContent}
-            />
+                    />
 
-            <AddButton onPress={openAddModal} />
+                    <AddButton onPress={openAddModal} />
+                </View>
+            </TouchableWithoutFeedback>
 
             <ModalForm
                 visible={isModalVisible}

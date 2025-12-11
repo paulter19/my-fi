@@ -41,13 +41,37 @@ export const selectSpendingByCategory = createSelector(
             }
         });
 
-        return Object.entries(categoryMap).map(([name, amount]) => ({
-            name,
-            amount,
-            color: '#' + Math.floor(Math.random() * 16777215).toString(16), // Random color for now
-            legendFontColor: '#7F7F7F',
-            legendFontSize: 15,
-        }));
+        // Calculate total for percentage calculation
+        const total = Object.values(categoryMap).reduce((sum, amount) => sum + amount, 0);
+
+        // Color palette that excludes white and light colors that blend with light backgrounds
+        const categoryColors = [
+            '#C44569', // Dark rose
+            '#6C5CE7', // Deep purple
+            '#00B894', // Dark teal
+            '#E17055', // Burnt orange
+            '#0984E3', // Deep blue
+            '#A29BFE', // Muted purple
+            '#FD79A8', // Dark pink
+            '#55A3FF', // Deep sky blue
+            '#FDCB6E', // Darker gold
+            '#74B9FF', // Steel blue
+            '#81ECEC', // Darker cyan
+            '#FF6B6B', // Coral red
+            '#4ECDC4', // Teal
+            '#FFD93D', // Golden yellow
+            '#95E1D3', // Mint green
+        ];
+
+        return Object.entries(categoryMap).map(([name, amount], index) => {
+            return {
+                name,
+                amount,
+                color: categoryColors[index % categoryColors.length],
+                legendFontColor: '#7F7F7F',
+                legendFontSize: 12,
+            };
+        });
     }
 );
 
@@ -76,16 +100,26 @@ export const selectIncomeVsBills = createSelector(
         const totalBills = bills.reduce((sum, item) => sum + item.amount, 0);
         const leftover = Math.max(0, income - totalBills);
 
-        // Generate colors for bills
-        const colors = [
-            '#EB5757', '#F2994A', '#F2C94C', '#219653', '#2D9CDB',
-            '#56CCF2', '#9B51E0', '#BB6BD9', '#FF9F43', '#54a0ff'
+        // Darker, more muted color palette with good contrast
+        // Using deeper, richer tones that work well together
+        const billColors = [
+            '#C44569', // Dark rose
+            '#6C5CE7', // Deep purple
+            '#00B894', // Dark teal
+            '#E17055', // Burnt orange
+            '#0984E3', // Deep blue
+            '#A29BFE', // Muted purple
+            '#FD79A8', // Dark pink
+            '#55A3FF', // Deep sky blue
+            '#FDCB6E', // Darker gold
+            '#74B9FF', // Steel blue
+            '#81ECEC', // Darker cyan
         ];
 
         const billSlices = bills.map((bill, index) => ({
             name: bill.title,
             amount: bill.amount,
-            color: colors[index % colors.length],
+            color: billColors[index % billColors.length],
             legendFontColor: '#7F7F7F',
             legendFontSize: 15,
         }));
@@ -93,9 +127,9 @@ export const selectIncomeVsBills = createSelector(
         return [
             ...billSlices,
             {
-                name: 'Leftover',
+                name: 'Remaining',
                 amount: leftover,
-                color: '#27AE60',
+                color: '#95E1D3', // Soft teal that complements the bill colors
                 legendFontColor: '#7F7F7F',
                 legendFontSize: 15,
             },
